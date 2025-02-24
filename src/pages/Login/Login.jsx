@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import {useState} from 'react'
 import { Navbar } from '../../components/Navbar/Navbar'
 import { Link } from 'react-router'
 import PasswordInput from '../../components/Input/PasswordInput'
