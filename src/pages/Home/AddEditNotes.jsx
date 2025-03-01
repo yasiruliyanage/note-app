@@ -42,7 +42,7 @@ const AddEditNotes = ({ onClose, type , noteData }) => {
         <MdClose className="text-xl text-slate-400" />
       </button>
       <div className="flex flex-col gap-2">
-        <label className='input-label'>TITLE</label>
+        <label className='input-label' data-testid="title">TITLE</label>
         <input
         type="text"
         className="text-2xl text-slate-950 outline-none"
