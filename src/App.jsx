@@ -5,12 +5,12 @@ import Login from './pages/Login/Login';
 import SignUp from './pages/SignUp/SignUp';
 
 
-
 const App = () => {
   return <div>  
     <Router>
   <Routes>
-  <Route path="/dashboard" exact element={<Home/>}/>
+  <Route path="/" exact element={<Home/>}/>
+  <Route path="/dashboard"  element={<Home/>}/>
   <Route path="/login"  element={<Login/>}/>
   <Route path="/signup"  element={<SignUp/>}/>
   </Routes>

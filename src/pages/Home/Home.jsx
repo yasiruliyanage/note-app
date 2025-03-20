@@ -2,8 +2,12 @@ import { MdAdd } from "react-icons/md"
 import NoteCard from "../../components/Cards/NoteCard"
 import { Navbar } from "../../components/Navbar/Navbar"
 import AddEditNotes from "./AddEditNotes"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router"
 import Modal from "react-modal";
+import axiosInstance from "../../utils/axiosinstanxe"
+import moment from "moment"
+import Toast from "../../components/ToastMessage/Toast"
 const Home = () => {
 
   const [openAddEditModal, setOpenAddEditModal] = useState({
@@ -12,25 +16,94 @@ const Home = () => {
     data:null,
   });
 
+  const [showToastMsg, setShowToastMsg] = useState({
+    isShown:false,
+    message: "",
+    type: "add",
+  });
+
+  const [userInfo, setUserInfo] = useState(null);
+  const [allNotes, setAllNotes] = useState([]);
+  const navigate = useNavigate();
+
+  const handleEdit = (noteDetails) => {
+    setOpenAddEditModal({isShown:true,data:noteDetails, type:"edit"});
+  }
+
+ const showToastMessage = (message,type) => {
+       setShowToastMsg({
+        isShown:true,
+        message,
+        type,
+       })
+ }
+
+  //close Toast message
+  const handleCloseToast = () => {
+      setShowToastMsg({
+        isShown: false,
+        message: "",
+      });
+  }
+  //Get User Info
+  const getUserInfo = async () => {
+    try {
+        const response = await axiosInstance.get("/get-user");
+        if(response.data && response.data.user) {
+          setUserInfo(response.data.user);
+        }
+    } catch (error) {
+      if (error.response.status === 401) {
+        localStorage.clear();
+        navigate("/login");
+      }
+    }
+  }
+
+  // Get All notes
+  const getAllNotes = async () => {
+    try {
+      const response = await axiosInstance.get("/get-all-notes");
+      if (response.data && response.data.notes) {
+          setAllNotes(response.data.notes);
+      }
+    } catch (error) {
+      console.log("An unexpected error occured. Please Try again.");
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    getUserInfo();
+    getAllNotes();
+    return () => {};
+  },[]);
+
+
   return (
     <>
-    <Navbar/>
+    <Navbar userInfo={userInfo}/>
     <div className="container mx-auto">
     <div className="grid grid-cols-3 gap-4 mt-8">
     {/** 
      * Notes cards start here
     */}
-    <NoteCard 
-    title="Meeting on 7th April" 
-    date="3rd Apr 2024"
-    content="Meeting on 7th April Meeting on 7th April"
-    tags="#Meeting"
-    isPinned={true}
-    onEdit={()=> {}}
-    onDelete={()=>{}}
-    onPinNote={()=>{}}
+    {allNotes.map((item) => {
+     
+    return( <NoteCard 
+     key={item._id}
+     title={item.title} 
+     date={item.createdOn}
+     content={item.content}
+     tags={item.tags}
+     isPinned={item.isPinned}
+     onEdit={()=> {handleEdit(item)}}
+     onDelete={()=>{}}
+     onPinNote={()=>{}}
+      />);
 
-     />
+})}
+   
 
      {/**
       * Notes cards end here
@@ -64,8 +137,18 @@ const Home = () => {
     noteData={openAddEditModal.data}
     onClose={() => {
       setOpenAddEditModal({isShown:false, type:"add", data:null});
-    }}/>
+    }}
+    getAllNotes = {getAllNotes}
+    showToastMessage={showToastMessage}
+    />
     </Modal>
+
+    <Toast
+      isShown={showToastMsg.isShown}
+      message={showToastMsg.message}
+      type={showToastMsg.type}
+      onClose={handleCloseToast}
+    />
     </>
   )
 }
